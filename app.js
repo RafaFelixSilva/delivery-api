@@ -4,6 +4,7 @@ function cadastrado() {
     let nomeCompleto = nome + " " + sobrenome 
 
     let endereco = "TV MAL DEODORO 81"
+    let complemento = "T1 AP 85"
     let celular = "(11) 940501957"
     let contato = "(11) 940501957"
 
