@@ -4,6 +4,9 @@ function cadastrado() {
     let nomeCompleto = nome + " " + sobrenome 
     
 
+
+    let contato = "(11) 940501957"
+
     console.log(nomeCompleto);
     
 }
