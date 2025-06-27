@@ -3,6 +3,7 @@ function cadastrado() {
     let sobrenome = "Cavalcanti"
     let nomeCompleto = nome + " " + sobrenome 
     
+    let endereco = "TV MAL DEODORO 81"
 
     console.log(nomeCompleto);
     
