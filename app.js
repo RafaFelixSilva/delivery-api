@@ -1,17 +1,25 @@
-function cadastrado() {
-    let nome = "Bruno"
-    let sobrenome = "Cavalcanti"
-    let nomeCompleto = nome + " " + sobrenome 
+const express = require('express')
+const app = express()
+const port = 3000
 
-    let endereco = "TV MAL DEODORO 81"
-    let complemento = "T1 AP 85"
-    let celular = "(11) 940501957"
-    let contato = "(11) 940501957"
+app.use(express.json());
 
-    console.log(nomeCompleto);
-    console.log(endereco);
-    console.log(celular);
+app.post('/cliente', (req, res) => {
+    const id = crypto.randomUUID();
+    const data = req.body;
     
-}
+    return res.status(200).json({
+        id: id,
+        data: data,
+        message: "Criado com sucesso",
+        status: 200
+    })
+})
 
-cadastrado();
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
+app.listen(port, () => {
+    console.log(`✅ App running at http://localhost:${port}/`);
+});
