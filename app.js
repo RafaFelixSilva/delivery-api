@@ -2,6 +2,7 @@ const express = require('express')
 const crypto = require('crypto')
 const app = express()
 const port = 3000
+const pool = require('./db')
 
 app.use(express.json());
 
@@ -22,8 +23,10 @@ app.post('/cliente', (req, res) => {
     })
 })
 
-app.get('/clientes', (req, res) => {
- return res.status(200).json(clientes)
+app.get('/clientes', async (req, res) => {
+    const result = await pool.query('select * from customer')
+    console.log(result)
+    return res.status(200).json(clientes)
 })
 
 app.get('/cliente/:id', (req, res) => {
