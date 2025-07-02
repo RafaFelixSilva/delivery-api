@@ -1,6 +1,6 @@
 {
   "dependencies": {
     "express": "^5.1.0",
-    "postgres": "^3.4.7"
+    "pg": "^8.16.3"
   }
 }
