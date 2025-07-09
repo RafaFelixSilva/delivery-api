@@ -33,31 +33,52 @@ app.post('/customer', async (req, res) => {
 app.get('/customers', async (req, res) => {
 
     //TODO parametro (Query Param) que retorna o status 
+    const {active} = req.query;
 
-    try {
-        const { rows } = await pool.query('SELECT * FROM customer');
-        return res.status(200).json(rows);
-    } catch (error) {
-        console.error("Erro ao buscar clientes:", error);
-        return res.status(500).json({ message: "Erro interno" });
+   try {
+    let result;
+
+    if (active === 'true' || active === 'false') {
+        result = await pool.query(
+            'SELECT * FROM customer WHERE active = $1',
+            [active === 'true']
+        );
+    }else {
+        result = await pool.query('SELECT * FROM customer');
     }
+
+    return res.status(200).json(result.rows);
+   }catch (error) {
+    console.error("error search customers: ", error);
+    return res.status(500).json({message: "internal error"});
+   }
 });
 
 // 🔹 Busca cliente por ID
 app.get('/customer/:id', async (req, res) => {
     const { id } = req.params;
+    const {active} = req.body;
+
+    if (typeof active !== "boolean") {
+        return res.status(400).json({message: "Field 'active' must be boolean (true or false)"});
+    }
 
     try {
         const customer = await findById(id);
 
         if (!customer) {
-            return res.status(404).json({ message: "Cliente não encontrado" });
+            return res.status(404).json({ message: "Customer not found" });
         }
 
-        return res.status(200).json(customer);
+        await pool.query(
+            `UPDATE customer SET active = $1 WHERE id = $2`,
+            [active, id]
+        );
+
+        return res.status(200).json({message: "Status updated successfuly", active});
     } catch (error) {
-        console.error("Erro ao buscar cliente:", error);
-        return res.status(500).json({ message: "Erro interno" });
+        console.error("Error search customer: ", error);
+        return res.status(500).json({ message: "Internal error" });
     }
 });
 
@@ -70,7 +91,7 @@ app.put('/customer/:id', async (req, res) => {
         const customer = await findById(id);
 
         if (!customer) {
-            return res.status(404).json({ message: "Cliente não encontrado" });
+            return res.status(404).json({ message: "Customer not found" });
         }
 
         await pool.query(
@@ -78,10 +99,10 @@ app.put('/customer/:id', async (req, res) => {
             [data.name, data.contact, id]
         );
 
-        return res.status(200).json({ message: "Cliente atualizado com sucesso", data });
+        return res.status(200).json({ message: "Customer updated successfuly", data });
     } catch (error) {
-        console.error("Erro ao atualizar cliente:", error);
-        return res.status(500).json({ message: "Erro interno" });
+        console.error("Error search customer: ", error);
+        return res.status(500).json({ message: "Internal error" });
     }
 });
 
