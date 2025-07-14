@@ -66,3 +66,6 @@ create table status (
 	id serial primary key,
 	name text not null
 );
+
+alter table customer 
+add email varchar;

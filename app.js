@@ -3,18 +3,20 @@ const crypto = require('crypto');
 const app = express();
 const port = 3000;
 const pool = require('./db');
+const cors = require('cors');
 
+app.use(cors());
 app.use(express.json());
 
 // 🔹 Cria novo cliente
 app.post('/customer', async (req, res) => {
     const id = crypto.randomUUID();
     const data = req.body;
-
+    
     try {
         await pool.query(
-            `INSERT INTO customer (id, name, contact, active) VALUES ($1, $2, $3, $4)`,
-            [id, data.name, data.contact, data.active] // 🔸 Ajuste conforme os campos reais da tabela
+            `INSERT INTO customer (id, name, contact, active, email) VALUES ($1, $2, $3, $4, $5)`,
+            [id, data.fullname, data.phone, true, data.email] // 🔸 Ajuste conforme os campos reais da tabela
         );
 
         //TODO Precisa retornar os dados que foram inseridos
