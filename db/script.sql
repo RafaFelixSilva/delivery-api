@@ -69,3 +69,5 @@ create table status (
 
 alter table customer 
 add email varchar;
+
+alter table customer add column password text;

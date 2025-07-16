@@ -1,9 +1,13 @@
 const express = require('express');
 const crypto = require('crypto');
+const cors = require('cors');
+const bcrypt = require('bcrypt');
+const pool = require('./db');
+
+
 const app = express();
 const port = 3000;
-const pool = require('./db');
-const cors = require('cors');
+
 
 app.use(cors());
 app.use(express.json());
@@ -14,6 +18,9 @@ app.post('/customer', async (req, res) => {
     const data = req.body;
     
     try {
+
+        const hashedPassword = await bcrypt.hash(data.password, 10);
+
         await pool.query(
             `INSERT INTO customer (id, name, contact, active, email) VALUES ($1, $2, $3, $4, $5)`,
             [id, data.fullname, data.phone, true, data.email] // 🔸 Ajuste conforme os campos reais da tabela
@@ -22,12 +29,11 @@ app.post('/customer', async (req, res) => {
         //TODO Precisa retornar os dados que foram inseridos
         return res.status(201).json({
             id,
-            message: "Cliente criado com sucesso",
-            data
+            message: "Customer successfully created.",
         });
     } catch (error) {
-        console.error("Erro ao criar cliente:", error);
-        return res.status(500).json({ message: "Erro ao criar cliente" });
+        console.error("Error creating customer:", error);
+        return res.status(500).json({ message: "Failed to create customer" });
     }
 });
 
@@ -120,3 +126,4 @@ async function findById(id) {
 app.listen(port, () => {
     console.log(`✅ App running at http://localhost:${port}/`);
 });
+

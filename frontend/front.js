@@ -34,7 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     name: data.fullname,
                     contact: data.phone,
                     active: true,
-                    email: data.email       
+                    email: data.email,  
+                    password: data.password     
                 })
             });
 
