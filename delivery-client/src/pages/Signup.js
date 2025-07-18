@@ -1,50 +1,32 @@
-import { useState } from "react";
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../index.css'; 
 
 export default function Signup() {
-    const [form, setForm] = useState({fullname: '', email: '', phone: '', password: '', confirm: ''});
     const navigate = useNavigate();
-
+// parei aqui
     const handleChange = (e) => {
-        setForm({...form, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (form.password !== form.confirm) {
-            alert("Passwords do not match.");
-            return;
-        }
-
-        const res = await fetch('http://localhost:3000/customer', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                name: form.fullname,
-                contact: form.phone,
-                active: true,
-                email: form.email,
-                password: form.password
-            })
-        });
-
-        if (res.ok) {
-            alert("Account created!");
-            navigate('/home');
-        } else {
-            alert("Failed to create account.");
-        }
+        alert("Account created successfully.")
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <input name="fullname" placeholder="Full Name" value={form.fullname} onChange={handleChange} required />
-            <input name="email" type="email" placeholder="Email" value={form.email} onChange={handleChange} required />
-            <input name="phone" placeholder="Phone Number" value={form.phone} onChange={handleChange} required />
-            <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} required />
-            <input name="confirm" type="password" placeholder="Confirm Password" value={form.confirm} onChange={handleChange} required />
-            <button type="submit">Sign Up</button>
-        </form>
+        <div className='signup-container'>
+            <h2>Create Your Account</h2>
+            <form>
+                <input type='text' name='fullname' placeholder='Full Name' required />
+                <input type='email' name='email' placeholder='Email Address' required />
+                <input type='tel' name='phone' placeholder='Phone Number' required />
+                <input type='password' name='password' placeholder='Password' required />
+                <input type='password' name='confirm_password' placeholder='Confirm password' required />
+
+                <button type='submit'>Sign Up</button>
+                <button type='button' className='cancel' onClick={() => navigate('/')}>Cancel</button>
+
+                <div className='login-link'>
+                    Already have an account? <a href='/login'>Log In</a>
+                </div>
+            </form>
+        </div>
     );
 }
