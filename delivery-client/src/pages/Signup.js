@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../index.css'; 
+import '../style.css';
+import '../media-query.css';
 
 export default function Signup() {
     const navigate = useNavigate();
@@ -20,8 +21,8 @@ export default function Signup() {
                 <input type='password' name='password' placeholder='Password' required />
                 <input type='password' name='confirm_password' placeholder='Confirm password' required />
 
-                <button type='submit'>Sign Up</button>
-                <button type='button' className='cancel' onClick={() => navigate('/')}>Cancel</button>
+                <button type='submit' onClick={() => navigate('/profile')}>Sign Up</button>
+                <button type='button' className='cancel' onClick={() => navigate('/home')}>Cancel</button>
 
                 <div className='login-link'>
                     Already have an account? <a href='/login'>Log In</a>
