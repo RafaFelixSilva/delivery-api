@@ -15,15 +15,15 @@ app.use(express.json());
 // 🔹 Cria novo cliente
 app.post('/customer', async (req, res) => {
     const id = crypto.randomUUID();
-    const data = req.body;
+    const {name, email,contact, password} = req.body;
     
     try {
 
-        const hashedPassword = await bcrypt.hash(data.password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         await pool.query(
-            `INSERT INTO customer (id, name, contact, active, email) VALUES ($1, $2, $3, $4, $5)`,
-            [id, data.fullname, data.phone, true, data.email] // 🔸 Ajuste conforme os campos reais da tabela
+            `INSERT INTO customer (id, name, email, contact, password, active) VALUES ($1, $2, $3, $4, $5, $6)`,
+            [id, name, email, contact, hashedPassword, true] // 🔸 Ajuste conforme os campos reais da tabela
         );
 
         //TODO Precisa retornar os dados que foram inseridos
@@ -34,6 +34,71 @@ app.post('/customer', async (req, res) => {
     } catch (error) {
         console.error("Error creating customer:", error);
         return res.status(500).json({ message: "Failed to create customer" });
+    }
+});
+
+// 🔹 Login do cliente
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required." });
+    }
+
+    try {
+        const { rows } = await pool.query('SELECT * FROM customer WHERE email = $1 ' , [email]);
+
+        if (rows.length === 0) {
+            return res.status(401).json({ message: "Invalid credentials." });
+        }
+
+        const customer = rows[0];
+
+        const isPasswordValid = await bcrypt.compare(password, customer.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: "Invalid credentials." });
+        }
+
+        // TODO: You can add JWT token here later if needed
+        return res.status(200).json({
+            id: customer.id,
+            name: customer.name,
+            email: customer.email,
+            message: "Login successful.",
+        });
+
+    } catch (error) {
+        console.error("Error during login:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+
+// atualiza o perfil do cliente
+app.put('/customer/profile/:id', async (req, res) => {
+    const {id} = req.params;
+    const {name, email, contact, password} = req.body;
+
+    try {
+        const customer = await findById(id);
+
+        if (!customer) {
+            return res.status(404).json({ message: "Customer not found"});
+        }
+
+        let hashedPassword = customer.password;
+        if (password) {
+            hashedPassword = await bcrypt.hash(password, 10);
+        }
+
+        await pool.query(
+            `UPDATE customer SET name = $1, email= $2, contact = $3, password = $4, WHERE id = $5`, [name, email, contact, hashedPassword, id]
+        );
+
+        return res.status(200).json({message: "Profile updated successfully"});
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        return res.status(500).json({message: "Internal server error"});
     }
 });
 

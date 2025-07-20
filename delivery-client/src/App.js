@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import About from './pages/About';
 import Profile from './pages/Profile';
+import EditProfile from './pages/EditProfile';
 
 function App() {
     return (
@@ -18,6 +19,7 @@ function App() {
                 <Route path='/forgot-password' element={<ForgotPassword />} />
                 <Route path='/about' element={<About />} />
                 <Route path='/profile' element={<Profile />} />
+                <Route path='/edit-profile' element={<EditProfile />} />
             </Routes>    
         </Router>
     );

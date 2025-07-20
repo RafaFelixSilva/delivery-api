@@ -15,6 +15,10 @@ insert into customer (id, contact, active, name) values ('3859e28a-85f7-4222-444
 update customer set name = 'Bruno' where id = '3859e28a-85f7-4583-8828-4a300cf96fc3';
 update customer set name = 'Rafael' where id = '3859e28a-85f7-4583-4444-4a300cf96fc3';
 update customer set name = 'Edson' where id = '3859e28a-85f7-4222-4444-4a300cf96fc3';
+update customer 
+set email = 'rafael@email.com', password = '123456' 
+where id = '3859e28a-85f7-4583-8828-4a300cf96fc3';
+
 
 select * from customer;
 
@@ -71,3 +75,4 @@ alter table customer
 add email varchar;
 
 alter table customer add column password text;
+
