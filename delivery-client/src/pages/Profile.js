@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import '../style.css';
 
 export default function Profile() {
-    // Fake user data
+    
     const user = JSON.parse(localStorage.getItem('customer'));
 
     if (!user) {
@@ -35,15 +35,15 @@ export default function Profile() {
                     </div>
                     <div className="profile-item">
                         <span className="label">Phone: </span>
-                        <span>{user.phone}</span>
+                        <span>{user.contact}</span>
                     </div>
                     <div className="profile-item">
                         <span className="label">Address: </span>
-                        <span>{user.address}</span>
+                        <span>{user.address || 'Not provided'}</span>
                     </div>
                     <div className="profile-item">
                         <span className="label">Joined: </span>
-                        <span>{user.joined}</span>
+                        <span>{user.joined || 'Unknown'}</span>
                     </div>
                 </div>
 

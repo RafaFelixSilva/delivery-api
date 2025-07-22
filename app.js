@@ -31,6 +31,9 @@ app.post('/customer', async (req, res) => {
         //TODO Precisa retornar os dados que foram inseridos
         return res.status(201).json({
             id,
+            name,
+            email,
+            contact,
             message: "Customer successfully created.",
         });
     } catch (error) {
