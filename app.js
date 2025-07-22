@@ -3,6 +3,8 @@ const crypto = require('crypto');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const pool = require('./db');
+const { v4: uuidv4 } = require('uuid');
+const { error } = require('console');
 
 
 const app = express();
@@ -34,6 +36,45 @@ app.post('/customer', async (req, res) => {
     } catch (error) {
         console.error("Error creating customer:", error);
         return res.status(500).json({ message: "Failed to create customer" });
+    }
+});
+
+// rota de cadastro
+app.post('/signup', async (req, res) => {
+    const {name, email, contact, password} = req.body;
+
+    if (!name || !email || !contact || !password) {
+        return res.status(400).json({ error: 'Missing required fields'});
+    }
+
+    try {
+        const existingUser = await pool.query(
+            'SELECT * FROM customer WHERE email = $1',
+            [email]
+        );
+
+        if (existingUser.rows.length > 0) {
+            return res.status(409).json({ error: 'Email already registered'});
+        }
+
+        const newUser = {
+            id: uuidv4(),
+            name,
+            email,
+            contact,
+            password,
+            active: true,
+        };
+
+        await pool.query(
+            `INSERT INTO customer (id, name, email, contact, password, active) VALUES ($1, $2, $3, $4, $5, $6)`,
+            [newUser.id, newUser.name, newUser.email, newUser.contact, newUser.password, newUser.active]
+        );
+
+        res.status(201).json({ message: 'User registered successfully'});
+    } catch (error) {
+        console.error('Signup error: ', error);
+        res.status(500).json({ error: 'Internal server error'});
     }
 });
 
@@ -92,7 +133,7 @@ app.put('/customer/profile/:id', async (req, res) => {
         }
 
         await pool.query(
-            `UPDATE customer SET name = $1, email= $2, contact = $3, password = $4, WHERE id = $5`, [name, email, contact, hashedPassword, id]
+            `UPDATE customer SET name = $1, email= $2, contact = $3, password = $4 WHERE id = $5`, [name, email, contact, hashedPassword, id]
         );
 
         return res.status(200).json({message: "Profile updated successfully"});
