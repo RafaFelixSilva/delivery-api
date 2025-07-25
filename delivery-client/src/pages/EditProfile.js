@@ -5,7 +5,10 @@ import "../style.css";
 
 export default function EditProfile() {
   const navigate = useNavigate();
-  const customerId = localStorage.getItem("customerId");
+
+  const storedCustomer = localStorage.getItem("customer");
+  const customer = storedCustomer ? JSON.parse(storedCustomer) : null;
+  const customerId = customer?.id;
 
   const [formData, setFormData] = useState({
     name: "",
@@ -16,23 +19,23 @@ export default function EditProfile() {
   });
 
   useEffect(() => {
-    if (!customerId) return;
-
-    axios
-      .get(`http://localhost:3000/customer/${customerId}`)
-      .then((response) => {
-        const customer = response.data;
-        setFormData({
-          name: customer.name || "",
-          email: customer.email || "",
-          phone: customer.contact || "",
-          address: customer.address || "",
-          password: "",
+    if (customerId) {
+      axios
+        .get(`http://localhost:3000/customer/${customerId}`)
+        .then((response) => {
+          const { name, email, contact, address } = response.data;
+          setFormData({
+            name: name || "",
+            email: email || "",
+            phone: contact || "",
+            address: address || "",
+            password: "",
+          });
+        })
+        .catch((error) => {
+          console.error("Error loading profile data:", error);
         });
-      })
-      .catch((error) => {
-        console.error("Error loading customer data", error);
-      });
+    }
   }, [customerId]);
 
   const handleInputChange = (event) => {
@@ -47,13 +50,16 @@ export default function EditProfile() {
     event.preventDefault();
 
     try {
-      await axios.put(`http://localhost:3000/customer/${customerId}`, {
+      const response = await axios.put(`http://localhost:3000/customer/${customerId}`, {
         name: formData.name,
         contact: formData.phone,
         email: formData.email,
         address: formData.address,
         password: formData.password,
       });
+
+      // Armazena o cliente atualizado no localStorage
+      localStorage.setItem("customer", JSON.stringify(response.data));
 
       alert("Profile updated successfully!");
       navigate("/profile");

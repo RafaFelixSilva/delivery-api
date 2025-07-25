@@ -16,31 +16,33 @@ app.use(express.json());
 
 // 🔹 Cria novo cliente
 app.post('/customer', async (req, res) => {
-    const id = crypto.randomUUID();
-    const {name, email,contact, password} = req.body;
-    
-    try {
+  const { name, contact, email, password } = req.body;
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+  try {
+    const result = await pool.query(
+      'INSERT INTO customer (name, contact, email, password) VALUES ($1, $2, $3, $4) RETURNING *',
+      [name, contact, email, password]
+    );
 
-        await pool.query(
-            `INSERT INTO customer (id, name, email, contact, password, active) VALUES ($1, $2, $3, $4, $5, $6)`,
-            [id, name, email, contact, hashedPassword, true] // 🔸 Ajuste conforme os campos reais da tabela
-        );
+    const newCustomer = result.rows[0]; 
 
-        //TODO Precisa retornar os dados que foram inseridos
-        return res.status(201).json({
-            id,
-            name,
-            email,
-            contact,
-            message: "Customer successfully created.",
-        });
-    } catch (error) {
-        console.error("Error creating customer:", error);
-        return res.status(500).json({ message: "Failed to create customer" });
-    }
+    return res.status(201).json({
+      id: newCustomer.id,
+      name: newCustomer.name,
+      email: newCustomer.email,
+      contact: newCustomer.contact,
+      address: newCustomer.address,
+      joined: newCustomer.joined, 
+      message: 'Customer created successfully.'
+    });
+
+  } catch (error) {
+    console.error("Error creating customer:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 });
+
+
 
 // rota de cadastro
 app.post('/signup', async (req, res) => {
@@ -71,10 +73,16 @@ app.post('/signup', async (req, res) => {
 
         await pool.query(
             `INSERT INTO customer (id, name, email, contact, password, active) VALUES ($1, $2, $3, $4, $5, $6)`,
-            [newUser.id, newUser.name, newUser.email, newUser.contact, newUser.password, newUser.active]
+            [newUser.id, newUser.name, newUser.email, newUser.contact, await bcrypt.hash(password, 10), true]
         );
 
-        res.status(201).json({ message: 'User registered successfully'});
+        res.status(201).json({ 
+            id: newUser.id,
+            name: newUser.name,
+            email: newUser.email,
+            contact: newUser.contact,
+            message: 'User registered successfully'
+        });
     } catch (error) {
         console.error('Signup error: ', error);
         res.status(500).json({ error: 'Internal server error'});
@@ -103,11 +111,13 @@ app.post('/login', async (req, res) => {
             return res.status(401).json({ message: "Invalid credentials." });
         }
 
-        // TODO: You can add JWT token here later if needed
         return res.status(200).json({
             id: customer.id,
             name: customer.name,
             email: customer.email,
+            contact: customer.contact,
+            address: customer.address,
+            joined: customer.joined,
             message: "Login successful.",
         });
 
@@ -174,11 +184,7 @@ app.get('/customers', async (req, res) => {
 // 🔹 Busca cliente por ID
 app.get('/customer/:id', async (req, res) => {
     const { id } = req.params;
-    const {active} = req.body;
 
-    if (typeof active !== "boolean") {
-        return res.status(400).json({message: "Field 'active' must be boolean (true or false)"});
-    }
 
     try {
         const customer = await findById(id);
@@ -187,14 +193,10 @@ app.get('/customer/:id', async (req, res) => {
             return res.status(404).json({ message: "Customer not found" });
         }
 
-        await pool.query(
-            `UPDATE customer SET active = $1 WHERE id = $2`,
-            [active, id]
-        );
 
-        return res.status(200).json({message: "Status updated successfuly", active});
+        return res.status(200).json(customer);
     } catch (error) {
-        console.error("Error search customer: ", error);
+        console.error("Error fetching customer: ", error);
         return res.status(500).json({ message: "Internal error" });
     }
 });
@@ -212,13 +214,22 @@ app.put('/customer/:id', async (req, res) => {
         }
 
         await pool.query(
-            `UPDATE customer SET name = $1, contact = $2 WHERE id = $3`,
-            [data.name, data.contact, id]
+            `UPDATE customer SET name = $1, contact = $2, email = $3, address = $4, password = $5 WHERE id = $6`,
+            [
+                data.name, 
+                data.contact,
+                data.email,
+                data.address || customer.address,
+                data.password || customer.password,
+                id,
+            ]
         );
 
-        return res.status(200).json({ message: "Customer updated successfuly", data });
+        const updateCustomer = await findById(id);
+
+        return res.status(200).json(updateCustomer);
     } catch (error) {
-        console.error("Error search customer: ", error);
+        console.error("Error updating customer: ", error);
         return res.status(500).json({ message: "Internal error" });
     }
 });

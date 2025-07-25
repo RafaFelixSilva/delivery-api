@@ -7,7 +7,7 @@ export default function Login() {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-
+    
     const handleLogin = async (e) => {
         e.preventDefault();
 
@@ -22,10 +22,10 @@ export default function Login() {
                 password
             });
 
-            const customerId = response.data?.id;
+            const customer = response.data;
 
-            if (customerId) {
-                localStorage.setItem('customerId', customerId);
+            if (customer && customer.id) {
+                localStorage.setItem('customer', JSON.stringify(customer));
                 alert('Login successful.');
                 navigate('/profile');
             } else {
@@ -34,7 +34,12 @@ export default function Login() {
 
         } catch (error) {
             console.error("Login error:", error);
-            alert("Invalid email or password.");
+            if (error.response) {
+                console.error("Backend response data:", error.response.data);
+                alert(error.response.data.message || "Invalid email or password.");
+            } else {
+                alert("Network or server error.");
+            }
         }
     };
 

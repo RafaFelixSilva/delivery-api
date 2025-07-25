@@ -3,8 +3,19 @@ import { Link } from "react-router-dom";
 import '../style.css';
 
 export default function Profile() {
-    
-    const user = JSON.parse(localStorage.getItem('customer'));
+    const storedUser = localStorage.getItem('customer');
+    let user = null;
+
+    if (storedUser) {
+        try {
+            const parsed = JSON.parse(storedUser);
+            if (parsed && parsed.id) {
+                user = parsed;
+            }
+        } catch (err) {
+            console.error("Invalid JSON in localStorage:", err);
+        }
+    }
 
     if (!user) {
         return (
@@ -43,14 +54,14 @@ export default function Profile() {
                     </div>
                     <div className="profile-item">
                         <span className="label">Joined: </span>
-                        <span>{user.joined || 'Unknown'}</span>
+                        <span>{user.joined ? new Date(user.joined).toLocaleDateString() : 'Not available'}</span>
                     </div>
                 </div>
 
-                 <div className="actions">
-                        <Link to='/edit-profile' className="btn-primary">Edit Profile </Link>
-                        <Link to='/home' className="btn-secondary">Back to Home</Link>
-                    </div>
+                <div className="actions">
+                    <Link to='/edit-profile' className="btn-primary">Edit Profile </Link>
+                    <Link to='/home' className="btn-secondary">Back to Home</Link>
+                </div>
             </main>
         </div>
     );
